@@ -98,7 +98,7 @@ class SpringViewController: UIViewController, UIPickerViewDelegate, UIPickerView
         ballView.y = selectedY
         ballView.rotate = selectedRotate
         
-        ballView.animation = animations[selectedRow].rawValue
+        ballView.animation = animations[selectedRow]
         ballView.curve = animationCurves[selectedEasing].rawValue
     }
     
@@ -115,37 +115,95 @@ class SpringViewController: UIViewController, UIPickerViewDelegate, UIPickerView
         })
         UIApplication.shared.setStatusBarStyle(UIStatusBarStyle.default, animated: true)
     }
+//
+//    let animations: [Spring.AnimationPreset] = [
+//        .Shake,
+//        .Pop,
+//        .Morph,
+//        .Squeeze,
+//        .Wobble,
+//        .Swing,
+//        .FlipX,
+//        .FlipY,
+//        .Fall,
+//        .SqueezeLeft,
+//        .SqueezeRight,
+//        .SqueezeDown,
+//        .SqueezeUp,
+//        .SlideLeft,
+//        .SlideRight,
+//        .SlideDown,
+//        .SlideUp,
+//        .FadeIn,
+//        .FadeOut,
+//        .FadeInLeft,
+//        .FadeInRight,
+//        .FadeInDown,
+//        .FadeInUp,
+//        .ZoomIn,
+//        .ZoomOut,
+//        .Flash
+//    ]
+    let animationNames = [
+                "Shake",
+                "Pop",
+                "Morph",
+                "Squeeze",
+                "Wobble",
+                "Swing",
+                "FlipX",
+                "FlipY",
+                "Fall",
+                "SqueezeLeft",
+                "SqueezeRight",
+                "SqueezeDown",
+                "SqueezeUp",
+                "SlideLeft",
+                "SlideRight",
+                "SlideDown",
+                "SlideUp",
+                "FadeIn",
+                "FadeOut",
+                "FadeInLeft",
+                "FadeInRight",
+                "FadeInDown",
+                "FadeInUp",
+                "ZoomIn",
+                "ZoomOut",
+                "Flash"
 
-    let animations: [Spring.AnimationPreset] = [
-        .Shake,
-        .Pop,
-        .Morph,
-        .Squeeze,
-        .Wobble,
-        .Swing,
-        .FlipX,
-        .FlipY,
-        .Fall,
-        .SqueezeLeft,
-        .SqueezeRight,
-        .SqueezeDown,
-        .SqueezeUp,
-        .SlideLeft,
-        .SlideRight,
-        .SlideDown,
-        .SlideUp,
-        .FadeIn,
-        .FadeOut,
-        .FadeInLeft,
-        .FadeInRight,
-        .FadeInDown,
-        .FadeInUp,
-        .ZoomIn,
-        .ZoomOut,
-        .Flash
     ]
 
-    var animationCurves: [Spring.AnimationCurve] = [
+    let animations: [AnimationPresetVariable] = [
+        .Shake(),
+        .Pop(),
+        .Morph,
+        .Squeeze,
+        .Wobble(),
+        .Swing(),
+        .FlipX,
+        .FlipY,
+        .Fall(),
+        .SqueezeLeft(),
+        .SqueezeRight(),
+        .SqueezeDown(),
+        .SqueezeUp(),
+        .SlideLeft(),
+        .SlideRight(),
+        .SlideDown(),
+        .SlideUp(),
+        .FadeIn(),
+        .FadeOut(),
+        .FadeInLeft(),
+        .FadeInRight(),
+        .FadeInDown(),
+        .FadeInUp(),
+        .ZoomIn(),
+        .ZoomOut(),
+        .Flash()
+    ]
+
+     var animationCurves: [Spring.AnimationCurve] = [
         .EaseIn,
         .EaseOut,
         .EaseInOut,
@@ -183,6 +241,7 @@ class SpringViewController: UIViewController, UIPickerViewDelegate, UIPickerView
         animationPicker.delegate = self
         animationPicker.dataSource = self
         animationPicker.showsSelectionIndicator = true
+
     }
     
     @IBAction func ballButtonPressed(_ sender: AnyObject) {
@@ -246,7 +305,11 @@ class SpringViewController: UIViewController, UIPickerViewDelegate, UIPickerView
     }
     
     func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
-        return component == 0 ? animations[row].rawValue : animationCurves[row].rawValue
+
+
+
+
+        return component == 0 ? animationNames[row] : animationCurves[row].rawValue
     }
     
     func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {

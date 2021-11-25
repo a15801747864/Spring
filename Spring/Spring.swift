@@ -22,10 +22,112 @@
 
 import UIKit
 
-@objc public protocol Springable {
+
+public enum AnimationPresetVariable{
+    case SlideLeft(_ x : CGFloat = 300)
+    case SlideRight(_ x : CGFloat = -300)
+    case SlideDown(_ y : CGFloat = -300)
+    case SlideUp(_ y : CGFloat = 300)
+    case SqueezeLeft(_ x : CGFloat = 300, _ force : CGFloat = 3)
+    case SqueezeRight(_ x : CGFloat = -300, _ force : CGFloat = 3)
+    case SqueezeDown(_ y : CGFloat = -300, _ force : CGFloat = 3)
+    case SqueezeUp(_ y : CGFloat = 300, _ force : CGFloat = 3)
+    case FadeIn(_ opacity : CGFloat = 0)
+    case FadeOut(_ opacity : CGFloat = 0, _ animateFrom : Bool = false)
+    case FadeOutIn(_ fromValue : CGFloat = 1, _ toValue : CGFloat = 0)
+    case FadeInLeft(_ opacity : CGFloat = 0, _ x : CGFloat = 300)
+    case FadeInRight(_ opacity : CGFloat = 0, _ x : CGFloat = -300)
+    case FadeInDown(_ opacity : CGFloat = 0, _ y : CGFloat = -300)
+    case FadeInUp(_ opacity : CGFloat = 0, _ y : CGFloat = 300)
+    case ZoomIn(_ opacity : CGFloat = 0, _ scaleX : CGFloat = 2, _ scaleY : CGFloat = 2)
+    case ZoomOut(_ opacity : CGFloat = 0, _ scaleX : CGFloat = 2, _ scaleY : CGFloat = 2, _ animateFrom : Bool = false )
+    case Fall(_ rotate : CGFloat = 15, _ y : CGFloat = 600, _ animateFrom : Bool = false)
+    case Shake(_ force : CGFloat = 30,  _ count : CGFloat = 5)
+    case Pop(_ force : CGFloat = 0.2, _ count : CGFloat = 5)
+
+    //
+    case FlipX
+    case FlipY
+    case Morph
+    case Squeeze
+
+    //
+    case Flash(_ fromValue : CGFloat = 1, _ toValue : CGFloat = 0)
+    case Wobble(_ animationForce : CGFloat = 0.3, _ xforce : CGFloat = 30, _ count : CGFloat = 5)
+    case Swing(_ force : CGFloat = 0.3, _ count : CGFloat = 5)
+
+    var engName:String{
+
+        switch self{
+
+        case .SlideLeft:
+            return "slideLeft"
+        case .SlideRight:
+            return  "slideRight"
+        case .SlideDown:
+            return "slideDown"
+        case .SlideUp :
+            return "slideUp"
+        case .SqueezeLeft :
+            return  "squeezeLeft"
+        case .SqueezeRight :
+            return  "squeezeRight"
+        case .SqueezeDown :
+            return  "squeezeDown"
+        case .SqueezeUp :
+            return  "squeezeUp"
+        case .FadeIn :
+            return  "fadeIn"
+        case .FadeOut :
+            return  "fadeOut"
+        case .FadeOutIn :
+            return  "fadeOutIn"
+        case .FadeInLeft :
+            return  "fadeInLeft"
+        case .FadeInRight :
+            return  "fadeInRight"
+        case .FadeInDown :
+            return  "fadeInDown"
+        case .FadeInUp :
+            return  "fadeInUp"
+        case .ZoomIn :
+            return  "zoomIn"
+        case .ZoomOut :
+            return  "zoomOut"
+        case .Fall :
+            return  "fall"
+        case .Shake :
+            return  "shake"
+        case .Pop :
+            return  "pop"
+        case .FlipX :
+            return  "flipX"
+        case .FlipY :
+            return  "flipY"
+        case .Morph :
+            return  "morph"
+        case .Squeeze :
+            return  "squeeze"
+        case .Flash :
+            return  "flash"
+        case .Wobble :
+            return  "wobble"
+        case .Swing :
+            return  "swing"
+        }
+    }
+
+
+    func getName()->String{
+        return self.engName
+    }
+}
+
+public protocol Springable : UIView {
     var autostart: Bool  { get set }
     var autohide: Bool  { get set }
-    var animation: String  { get set }
+    var animation: AnimationPresetVariable?  { get set }
+    //var animationEnum: AnimationPresetVariable  { get set }
     var force: CGFloat  { get set }
     var delay: CGFloat { get set }
     var duration: CGFloat { get set }
@@ -79,10 +181,12 @@ public class Spring : NSObject {
     deinit {
         NotificationCenter.default.removeObserver(self, name: UIApplication.didBecomeActiveNotification, object: nil)
     }
-    
+
+//    private var animationEnum: AnimationPresetVariable { set { self.view.animationEnum = newValue } get { return self.view.animationEnum }}
+
     private var autostart: Bool { set { self.view.autostart = newValue } get { return self.view.autostart }}
     private var autohide: Bool { set { self.view.autohide = newValue } get { return self.view.autohide }}
-    private var animation: String { set { self.view.animation = newValue } get { return self.view.animation }}
+    private var animation: AnimationPresetVariable? { set { self.view.animation = newValue } get { return self.view.animation }}
     private var force: CGFloat { set { self.view.force = newValue } get { return self.view.force }}
     private var delay: CGFloat { set { self.view.delay = newValue } get { return self.view.delay }}
     private var duration: CGFloat { set { self.view.duration = newValue } get { return self.view.duration }}
@@ -97,7 +201,9 @@ public class Spring : NSObject {
     private var opacity: CGFloat { set { self.view.opacity = newValue } get { return self.view.opacity }}
     private var animateFrom: Bool { set { self.view.animateFrom = newValue } get { return self.view.animateFrom }}
     private var curve: String { set { self.view.curve = newValue } get { return self.view.curve }}
-    
+
+
+
     // UIView
     private var layer : CALayer { return view.layer }
     private var transform : CGAffineTransform { get { return view.transform } set { view.transform = newValue }}
@@ -132,7 +238,14 @@ public class Spring : NSObject {
         case Wobble = "wobble"
         case Swing = "swing"
     }
-    
+
+
+
+
+
+
+
+
     public enum AnimationCurve: String {
         case EaseIn = "easeIn"
         case EaseOut = "easeOut"
@@ -167,84 +280,151 @@ public class Spring : NSObject {
     
     func animatePreset() {
         alpha = 0.99
-        if let animation = AnimationPreset(rawValue: animation) {
+        if let animation = animation {
             switch animation {
-            case .SlideLeft:
-                x = 300*force
-            case .SlideRight:
-                x = -300*force
-            case .SlideDown:
-                y = -300*force
-            case .SlideUp:
-                y = 300*force
-            case .SqueezeLeft:
-                x = 300
-                scaleX = 3*force
-            case .SqueezeRight:
-                x = -300
-                scaleX = 3*force
-            case .SqueezeDown:
-                y = -300
-                scaleY = 3*force
-            case .SqueezeUp:
-                y = 300
-                scaleY = 3*force
-            case .FadeIn:
-                opacity = 0
-            case .FadeOut:
-                animateFrom = false
-                opacity = 0
-            case .FadeOutIn:
+            case .SlideLeft(let v):
+                x = v*force
+            case .SlideRight(let v):
+                x = v*force
+            case .SlideDown(let v):
+                y = -v*force
+            case .SlideUp(let v):
+                y = v*force
+            case .SqueezeLeft(let v, let sx):
+                x = v
+                scaleX = sx*force
+            case .SqueezeRight(let v, let sx):
+                x = -v
+                scaleX = sx*force
+            case .SqueezeDown(let v, let sy):
+                y = -v
+                scaleY = sy*force
+            case .SqueezeUp(let v, let sy):
+                y = v
+                scaleY = sy*force
+            case .FadeIn(let v):
+                opacity = v
+            case .FadeOut(let v, let b):
+                animateFrom = b
+                opacity = v
+            case .FadeOutIn(let f, let t):
                 let animation = CABasicAnimation()
                 animation.keyPath = "opacity"
-                animation.fromValue = 1
-                animation.toValue = 0
+                animation.fromValue = f
+                animation.toValue = t
                 animation.timingFunction = getTimingFunction(curve: curve)
                 animation.duration = CFTimeInterval(duration)
                 animation.beginTime = CACurrentMediaTime() + CFTimeInterval(delay)
                 animation.autoreverses = true
                 layer.add(animation, forKey: "fade")
-            case .FadeInLeft:
-                opacity = 0
-                x = 300*force
-            case .FadeInRight:
-                x = -300*force
-                opacity = 0
-            case .FadeInDown:
-                y = -300*force
-                opacity = 0
-            case .FadeInUp:
-                y = 300*force
-                opacity = 0
-            case .ZoomIn:
-                opacity = 0
-                scaleX = 2*force
-                scaleY = 2*force
-            case .ZoomOut:
-                animateFrom = false
-                opacity = 0
-                scaleX = 2*force
-                scaleY = 2*force
-            case .Fall:
-                animateFrom = false
-                rotate = 15 * CGFloat(CGFloat.pi/180)
-                y = 600*force
-            case .Shake:
+            case .FadeInLeft(let v, let fx):
+                opacity = v
+                x = fx*force
+            case .FadeInRight(let v, let fx):
+                x = -fx*force
+                opacity = v
+            case .FadeInDown(let v, let fy):
+                y = -fy*force
+                opacity = v
+            case .FadeInUp(let v, let fy):
+                y = fy*force
+                opacity = v
+            case .ZoomIn(let v, let sx, let sy):
+                opacity = v
+                scaleX = sx*force
+                scaleY = sy*force
+            case .ZoomOut(let v, let sx, let sy, let b):
+                animateFrom = b
+                opacity = v
+                scaleX = sx*force
+                scaleY = sy*force
+            case .Fall(let v, let sy, let b):
+                animateFrom = b
+                rotate = v * CGFloat(CGFloat.pi/180)
+                y = sy*force
+            case .Shake(let force, let count):
+
+                var c = Int(count)
+                if (c % 2 == 0){
+                    c += 1
+                }
+                if (c <= 4){
+                    c = 5
+                }
+
+                var values :[Any] = []
+                var keyTimes : [NSNumber] = []
+                let time : Float = Float(1 / c)
+                for i in 0...c - 1 {
+                    if (i == 0){
+                        values.append(0)
+                        keyTimes.append(0)
+                    }
+                    else if (i == c - 1){
+                        values.append(0)
+                    }
+                    else {
+
+                        if (i % 2 == 0){
+                            values.append(force)
+                        }
+                        else {
+                            values.append(-force)
+                        }
+                        keyTimes.append(NSNumber(value: time * Float(i)))
+                    }
+                }
+                keyTimes.append(NSNumber(value: 1))
+
+
+
                 let animation = CAKeyframeAnimation()
                 animation.keyPath = "position.x"
-                animation.values = [0, 30*force, -30*force, 30*force, 0]
-                animation.keyTimes = [0, 0.2, 0.4, 0.6, 0.8, 1]
+                animation.values = values //[0, 30*force, -30*force, 30*force, 0]
+                animation.keyTimes =  keyTimes //[0, 0.2, 0.4, 0.6, 0.8, 1]
                 animation.timingFunction = getTimingFunction(curve: curve)
                 animation.duration = CFTimeInterval(duration)
                 animation.isAdditive = true
                 animation.repeatCount = repeatCount
                 animation.beginTime = CACurrentMediaTime() + CFTimeInterval(delay)
                 layer.add(animation, forKey: "shake")
-            case .Pop:
+            case .Pop(let force, let count):
+
+                var c = Int(count)
+                if (c % 2 == 0){
+                    c += 1
+                }
+                if (c <= 4){
+                    c = 5
+                }
+
+                var values :[Any] = []
+                var keyTimes : [NSNumber] = []
+                let time : Float = Float(1 / c)
+                for i in 0...c - 1 {
+                    if (i == 0){
+                        values.append(0)
+                        keyTimes.append(0)
+                    }
+                    else if (i == c - 1){
+                        values.append(0)
+                    }
+                    else {
+                        if (i % 2 == 0){
+                            values.append(force)
+                        }
+                        else {
+                            values.append(-force)
+                        }
+                        keyTimes.append(NSNumber(value: time * Float(i)))
+                    }
+                }
+                keyTimes.append(NSNumber(value: 1))
+
                 let animation = CAKeyframeAnimation()
                 animation.keyPath = "transform.scale"
-                animation.values = [0, 0.2*force, -0.2*force, 0.2*force, 0]
-                animation.keyTimes = [0, 0.2, 0.4, 0.6, 0.8, 1]
+                animation.values = values//[0, 0.2*force, -0.2*force, 0.2*force, 0]
+                animation.keyTimes = keyTimes//[0, 0.2, 0.4, 0.6, 0.8, 1]
                 animation.timingFunction = getTimingFunction(curve: curve)
                 animation.duration = CFTimeInterval(duration)
                 animation.isAdditive = true
@@ -257,7 +437,7 @@ public class Spring : NSObject {
                 scaleY = 1
                 var perspective = CATransform3DIdentity
                 perspective.m34 = -1.0 / layer.frame.size.width/2
-                
+
                 let animation = CABasicAnimation()
                 animation.keyPath = "transform"
                 animation.fromValue = NSValue(caTransform3D: CATransform3DMakeRotation(0, 0, 0, 0))
@@ -271,7 +451,7 @@ public class Spring : NSObject {
             case .FlipY:
                 var perspective = CATransform3DIdentity
                 perspective.m34 = -1.0 / layer.frame.size.width/2
-                
+
                 let animation = CABasicAnimation()
                 animation.keyPath = "transform"
                 animation.fromValue = NSValue(caTransform3D:
@@ -283,6 +463,7 @@ public class Spring : NSObject {
                 animation.beginTime = CACurrentMediaTime() + CFTimeInterval(delay)
                 animation.timingFunction = getTimingFunction(curve: curve)
                 layer.add(animation, forKey: "3d")
+
             case .Morph:
                 let morphX = CAKeyframeAnimation()
                 morphX.keyPath = "transform.scale.x"
@@ -293,7 +474,7 @@ public class Spring : NSObject {
                 morphX.repeatCount = repeatCount
                 morphX.beginTime = CACurrentMediaTime() + CFTimeInterval(delay)
                 layer.add(morphX, forKey: "morphX")
-                
+
                 let morphY = CAKeyframeAnimation()
                 morphY.keyPath = "transform.scale.y"
                 morphY.values = [1, 0.7, 1.3*force, 0.7, 1]
@@ -303,6 +484,7 @@ public class Spring : NSObject {
                 morphY.repeatCount = repeatCount
                 morphY.beginTime = CACurrentMediaTime() + CFTimeInterval(delay)
                 layer.add(morphY, forKey: "morphY")
+
             case .Squeeze:
                 let morphX = CAKeyframeAnimation()
                 morphX.keyPath = "transform.scale.x"
@@ -313,7 +495,7 @@ public class Spring : NSObject {
                 morphX.repeatCount = repeatCount
                 morphX.beginTime = CACurrentMediaTime() + CFTimeInterval(delay)
                 layer.add(morphX, forKey: "morphX")
-                
+
                 let morphY = CAKeyframeAnimation()
                 morphY.keyPath = "transform.scale.y"
                 morphY.values = [1, 0.5, 1, 0.5, 1]
@@ -323,50 +505,130 @@ public class Spring : NSObject {
                 morphY.repeatCount = repeatCount
                 morphY.beginTime = CACurrentMediaTime() + CFTimeInterval(delay)
                 layer.add(morphY, forKey: "morphY")
-            case .Flash:
+
+            case .Flash(let f, let t):
                 let animation = CABasicAnimation()
                 animation.keyPath = "opacity"
-                animation.fromValue = 1
-                animation.toValue = 0
+                animation.fromValue = f
+                animation.toValue = t
                 animation.duration = CFTimeInterval(duration)
                 animation.repeatCount = repeatCount * 2.0
                 animation.autoreverses = true
                 animation.beginTime = CACurrentMediaTime() + CFTimeInterval(delay)
                 layer.add(animation, forKey: "flash")
-            case .Wobble:
+
+            case .Wobble(let af, let xf, let count):
+
+                var c = Int(count)
+                if (c % 2 == 0){
+                    c += 1
+                }
+                if (c <= 4){
+                    c = 5
+                }
+
+                var avalues :[Any] = []
+                var xvalues :[Any] = []
+                var keyTimes : [NSNumber] = []
+
+
+                let time : Float = Float(1 / c)
+                for i in 0...c - 1 {
+                    if (i == 0){
+                        avalues.append(0)
+                        xvalues.append(0)
+                        keyTimes.append(0)
+                    }
+                    else if (i == c - 1){
+                        avalues.append(0)
+                        xvalues.append(0)
+                    }
+                    else {
+                        if (i % 2 == 0){
+                            avalues.append(af)
+                            xvalues.append(xf)
+                        }
+                        else {
+                            avalues.append(-af)
+                            xvalues.append(-xf)
+                        }
+                        keyTimes.append(NSNumber(value: time * Float(i)))
+                    }
+                }
+                keyTimes.append(NSNumber(value: 1))
+
+
                 let animation = CAKeyframeAnimation()
                 animation.keyPath = "transform.rotation"
-                animation.values = [0, 0.3*force, -0.3*force, 0.3*force, 0]
-                animation.keyTimes = [0, 0.2, 0.4, 0.6, 0.8, 1]
+                animation.values = avalues//[0, 0.3*force, -0.3*force, 0.3*force, 0]
+                animation.keyTimes = keyTimes//[0, 0.2, 0.4, 0.6, 0.8, 1]
                 animation.duration = CFTimeInterval(duration)
                 animation.isAdditive = true
                 animation.beginTime = CACurrentMediaTime() + CFTimeInterval(delay)
                 layer.add(animation, forKey: "wobble")
-                
+
                 let x = CAKeyframeAnimation()
                 x.keyPath = "position.x"
-                x.values = [0, 30*force, -30*force, 30*force, 0]
-                x.keyTimes = [0, 0.2, 0.4, 0.6, 0.8, 1]
+                x.values = xvalues//[0, 30*force, -30*force, 30*force, 0]
+                x.keyTimes = keyTimes//[0, 0.2, 0.4, 0.6, 0.8, 1]
                 x.timingFunction = getTimingFunction(curve: curve)
                 x.duration = CFTimeInterval(duration)
                 x.isAdditive = true
                 x.repeatCount = repeatCount
                 x.beginTime = CACurrentMediaTime() + CFTimeInterval(delay)
                 layer.add(x, forKey: "x")
-            case .Swing:
+
+            //case Wobble(_ animationForce : CGFloat = 0.3, _ xforce : CGFloat = 30, _ time : CGFloat = 1, _ count : CGFloat = 5)
+           //  case Swing(_ force : CGFloat = 0.3, _ time : CGFloat = 1, _ count : CGFloat = 5)
+
+            case .Swing(let force, let count):
+
+                var c = Int(count)
+                if (c % 2 == 0){
+                    c += 1
+                }
+                if (c <= 4){
+                    c = 5
+                }
+
+                var values :[Any] = []
+                var keyTimes : [NSNumber] = []
+                let time : Float = Float(1 / c)
+                for i in 0...c - 1 {
+                    if (i == 0){
+                        values.append(0)
+                        keyTimes.append(0)
+                    }
+                    else if (i == c - 1){
+                        values.append(0)
+                    }
+                    else {
+                        if (i % 2 == 0){
+                            values.append(force)
+                        }
+                        else {
+                            values.append(-force)
+                        }
+                        keyTimes.append(NSNumber(value: time * Float(i)))
+                    }
+                }
+                keyTimes.append(NSNumber(value: 1))
                 let animation = CAKeyframeAnimation()
                 animation.keyPath = "transform.rotation"
-                animation.values = [0, 0.3*force, -0.3*force, 0.3*force, 0]
-                animation.keyTimes = [0, 0.2, 0.4, 0.6, 0.8, 1]
+                animation.values = values//[0, 0.3*force, -0.3*force, 0.3*force, 0]
+                animation.keyTimes = keyTimes//[0, 0.2, 0.4, 0.6, 0.8, 1]
                 animation.duration = CFTimeInterval(duration)
                 animation.isAdditive = true
                 animation.repeatCount = repeatCount
                 animation.beginTime = CACurrentMediaTime() + CFTimeInterval(delay)
                 layer.add(animation, forKey: "swing")
-            }
+
+             }
         }
     }
-    
+
+
+
     func getTimingFunction(curve: String) -> CAMediaTimingFunction {
         if let curve = AnimationCurve(rawValue: curve) {
             switch curve {
@@ -517,7 +779,7 @@ public class Spring : NSObject {
     func resetAll() {
         x = 0
         y = 0
-        animation = ""
+        animation = nil
         opacity = 1
         scaleX = 1
         scaleY = 1

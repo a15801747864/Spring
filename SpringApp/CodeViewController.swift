@@ -22,9 +22,9 @@ class CodeViewController: UIViewController {
         
         modalView.transform = CGAffineTransform(translationX: -300, y: 0)
         
-        if data.animation != "" {
-            codeText += "layer.animation = \"\(data.animation)\"\n"
-        }
+//        if data.animation != "" {
+//            codeText += "layer.animation = \"\(data.animation)\"\n"
+//        }
         if data.curve != "" {
             codeText += "layer.curve = \"\(data.curve)\"\n"
         }
@@ -60,7 +60,7 @@ class CodeViewController: UIViewController {
     @IBAction func closeButtonPressed(_ sender: AnyObject) {
         UIApplication.shared.sendAction(#selector(SpringViewController.maximizeView(_:)), to: nil, from: self, for: nil)
         
-        modalView.animation = "slideRight"
+        modalView.animation = .SlideRight()
         modalView.animateFrom = false
         modalView.animateToNext(completion: {
             self.dismiss(animated: false, completion: nil)

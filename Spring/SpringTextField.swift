@@ -25,7 +25,7 @@ import UIKit
 open class SpringTextField: UITextField, Springable {
     @IBInspectable public var autostart: Bool = false
     @IBInspectable public var autohide: Bool = false
-    @IBInspectable public var animation: String = ""
+    public var animation: AnimationPresetVariable? = nil
     @IBInspectable public var force: CGFloat = 1
     @IBInspectable public var delay: CGFloat = 0
     @IBInspectable public var duration: CGFloat = 0.7
